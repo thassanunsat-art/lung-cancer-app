@@ -8,7 +8,7 @@ IMG_SIZE = 128
 
 @st.cache_resource
 def load_cancer_model():
-    return tf.keras.models.load_model('best_model.keras')
+    return tf.keras.models.load_model('DenseNet121.keras')
 
 st.title("Lung Cancer Image Classifier 🫁")
 st.write("อัปโหลดรูปภาพเนื้อเยื่อปอดเพื่อทำการจำแนกประเภท")
