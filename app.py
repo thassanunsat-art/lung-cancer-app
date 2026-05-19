@@ -3,32 +3,47 @@ import tensorflow as tf
 from PIL import Image
 import numpy as np
 
-CLASSES = ['Lung Normal (lung_n)', 'Lung Adenocarcinoma (lung_aca)', 'Lung Squamous Cell Carcinoma (lung_scc)']
-IMG_SIZE = 128
+# 1. ตั้งค่าหน้าเพจ
+st.set_page_config(page_title="AI Image Classifier", page_icon="🤖")
+st.title("แอปพลิเคชันจำแนกรูปภาพด้วย MobileNetV2 🤖")
 
+# 2. ฟังก์ชันโหลดโมเดล (ใช้ @st.cache_resource เพื่อไม่ให้โหลดใหม่ทุกครั้งที่รีเฟรชหน้า)
 @st.cache_resource
-def load_cancer_model():
-    return tf.keras.models.load_model('MobileNetV2.h5')
+def load_model():
+    # โหลดโมเดล Keras ที่คุณอัปโหลดไว้
+    model = tf.keras.models.load_model('MobileNetV2.keras')
+    return model
 
-st.title("Lung Cancer Image Classifier 🫁")
-st.write("อัปโหลดรูปภาพเนื้อเยื่อปอดเพื่อทำการจำแนกประเภท")
+model = load_model()
+st.success("โหลดโมเดลสำเร็จแล้ว!")
 
-model = tf.keras.models.load_model('MobileNetV2.h5')
-
-uploaded_file = st.file_uploader("เลือกไฟล์ภาพ", type=["jpg", "jpeg", "png"])
+# 3. สร้างส่วนอัปโหลดไฟล์รูปภาพ
+uploaded_file = st.file_uploader("อัปโหลดรูปภาพที่นี่ (jpg, jpeg, png)", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
+    # แสดงรูปภาพที่อัปโหลด
     image = Image.open(uploaded_file)
-    st.image(image, caption='ภาพที่อัปโหลด', use_container_width=True)
+    st.image(image, caption="รูปภาพที่อัปโหลด", use_column_width=True)
+    
     st.write("กำลังประมวลผล...")
-
-    img = image.resize((IMG_SIZE, IMG_SIZE))
-    img_array = np.array(img) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-
-    predictions = model.predict(img_array)
-    predicted_class_idx = np.argmax(predictions, axis=1)[0]
-    confidence = np.max(predictions) * 100
-
-    st.success(f"ผลการทำนาย: {CLASSES[predicted_class_idx]}")
-    st.info(f"ความมั่นใจ: {confidence:.2f}%")
+    
+    # 4. เตรียมรูปภาพให้พร้อมสำหรับโมเดล (Pre-processing)
+    # จากข้อมูลโมเดลของคุณ ใช้ขนาด 128x128
+    image_resized = image.resize((128, 128)) 
+    image_array = np.array(image_resized)
+    
+    # ตรวจสอบว่าภาพมี 3 channels (RGB)
+    if image_array.shape[-1] == 4: # ถ้าเป็น RGBA ให้แปลงเป็น RGB
+        image_array = image_array[..., :3]
+        
+    image_array = image_array / 255.0 # Normalize ค่าสีให้อยู่ในช่วง 0-1
+    image_array = np.expand_dims(image_array, axis=0) # เพิ่มมิติ Batch size ให้เป็น (1, 128, 128, 3)
+    
+    # 5. ทำนายผล (Prediction)
+    if st.button("ทำนายผลภาพนี้"):
+        predictions = model.predict(image_array)
+        
+        # แสดงผลลัพธ์ (สมมติว่าเป็นโมเดลที่มีหลายคลาส)
+        predicted_class = np.argmax(predictions, axis=1)
+        st.subheader(f"ผลการทำนาย: คลาสที่ {predicted_class[0]}")
+        st.write("ความน่าจะเป็น:", predictions)
