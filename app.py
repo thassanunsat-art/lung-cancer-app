@@ -13,7 +13,7 @@ def load_cancer_model():
 st.title("Lung Cancer Image Classifier 🫁")
 st.write("อัปโหลดรูปภาพเนื้อเยื่อปอดเพื่อทำการจำแนกประเภท")
 
-model = load_cancer_model()
+model = tf.keras.models.load_model('MobileNetV2.h5')
 
 uploaded_file = st.file_uploader("เลือกไฟล์ภาพ", type=["jpg", "jpeg", "png"])
 
