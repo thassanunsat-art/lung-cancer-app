@@ -130,7 +130,7 @@ st.markdown("""
 # ==========================================
 # 2. ส่วนโหลดโมเดล AI (TensorFlow)
 # ==========================================
-CLASSES = ['Lung Normal (lung_n)', 'Lung Adenocarcinoma (lung_aca)', 'Lung Squamous Cell Carcinoma (lung_scc)']
+CLASSES = ['Lung Adenocarcinoma (lung_aca)', 'Lung Normal (lung_n)', 'Lung Squamous Cell Carcinoma (lung_scc)']
 IMG_SIZE = 128
 
 @st.cache_resource
